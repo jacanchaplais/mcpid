@@ -3,6 +3,7 @@ from fractions import Fraction
 import os
 
 import numpy as np
+from numpy.lib import recfunctions as rfn
 
 
 CURRENT_DIR = str(os.path.dirname(os.path.realpath(__file__)))
@@ -100,5 +101,6 @@ class PdgRecords:
         pdg_ids, pdg_inv_idxs = np.unique(pdgs, return_inverse=True)
         uniq_data = self.__lookup.loc[pdg_ids][props]
         uniq_data = uniq_data.to_records()
+        uniq_data = rfn.drop_fields(uniq_data, 'id')
         data = uniq_data[pdg_inv_idxs]
         return data
