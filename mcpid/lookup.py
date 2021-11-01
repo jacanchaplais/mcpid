@@ -37,7 +37,7 @@ def frac(num_str, obj_mode=False):
         elif num_str == '?':
             return np.nan
 
-class LookupPDG:
+class PdgRecords:
     import pandas as __pd
 
     def __init__(self, frac_obj=False):
@@ -50,7 +50,7 @@ class LookupPDG:
         lookup_table.columns = lookup_table.columns.str.lower()
         self.__lookup = lookup_table.set_index('id')
 
-    def pdg_properties(self, pdgs: np.ndarray, props: list) -> np.recarray:
+    def properties(self, pdgs: np.ndarray, props: list) -> np.recarray:
         """Returns the physical properties of a sequence of particles
         based on their pdg code.
 
