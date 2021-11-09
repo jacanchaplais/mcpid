@@ -42,14 +42,17 @@ class PdgRecords:
     import pandas as __pd
 
     def __init__(self, frac_obj=False):
-        frac_cols = ['I', 'G', 'P', 'C', 'Charge']
+        frac_cols = ['i', 'g', 'p', 'c', 'charge']
         cast_frac = partial(frac, obj_mode=frac_obj)
         converters = dict.fromkeys(frac_cols, cast_frac)
         lookup_table = self.__pd.read_csv(
                 CURRENT_DIR + '/_mcpid.csv', sep=',', comment='#',
                 converters=converters)
-        lookup_table.columns = lookup_table.columns.str.lower()
         self.__lookup = lookup_table.set_index('id')
+
+    @property
+    def table(self):
+        return self.__lookup
 
     def properties(self, pdgs: np.ndarray, props: list) -> np.recarray:
         """Returns the physical properties of a sequence of particles
