@@ -3,10 +3,12 @@ from fractions import Fraction
 import os
 
 import numpy as np
+import numpy.typing as npt
 from numpy.lib import recfunctions as rfn
 
 
 CURRENT_DIR = str(os.path.dirname(os.path.realpath(__file__)))
+
 
 def frac(num_str, obj_mode=False):
     """Converts string formatted fraction into number.
@@ -26,9 +28,9 @@ def frac(num_str, obj_mode=False):
         other edge cases will raise a ValueError
 
     """
-    if obj_mode == False:
+    if obj_mode is False:
         cast_frac = lambda inp: float(Fraction(inp))
-    elif obj_mode == True:
+    elif obj_mode is True:
         cast_frac = Fraction
     try:
         return cast_frac(num_str)
@@ -38,8 +40,9 @@ def frac(num_str, obj_mode=False):
         elif num_str == '?':
             return np.nan
 
+
 class PdgRecords:
-    import pandas as __pd
+    import pandas as __pd  # type: ignore
 
     def __init__(self, frac_obj=False):
         frac_cols = ['i', 'g', 'p', 'c', 'charge']
@@ -54,7 +57,7 @@ class PdgRecords:
     def table(self):
         return self.__lookup
 
-    def properties(self, pdgs: np.ndarray, props: list) -> np.recarray:
+    def properties(self, pdgs: npt.ArrayLike, props: list) -> np.ndarray:
         """Returns the physical properties of a sequence of particles
         based on their pdg code.
 
