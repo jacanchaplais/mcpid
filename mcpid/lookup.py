@@ -1,6 +1,7 @@
 from functools import partial
 from fractions import Fraction
 import os
+import warnings
 
 import numpy as np
 import numpy.typing as npt
@@ -35,23 +36,23 @@ def frac(num_str, obj_mode=False):
     try:
         return cast_frac(num_str)
     except ValueError:
-        if num_str == '':
-            return cast_frac('0/1')
-        elif num_str == '?':
+        if num_str == "":
+            return cast_frac("0/1")
+        elif num_str == "?":
             return np.nan
 
 
 class PdgRecords:
-    import pandas as __pd  # type: ignore
-
     def __init__(self, frac_obj=False):
-        frac_cols = ['i', 'g', 'p', 'c', 'charge']
+        import pandas as pd
+
+        frac_cols = ["i", "g", "p", "c", "charge"]
         cast_frac = partial(frac, obj_mode=frac_obj)
         converters = dict.fromkeys(frac_cols, cast_frac)
-        lookup_table = self.__pd.read_csv(
-                CURRENT_DIR + '/_mcpid.csv', sep=',', comment='#',
+        lookup_table: pd.DataFrame = pd.read_csv(  # type: ignore
+                CURRENT_DIR + "/_mcpid.csv", sep=",", comment="#",
                 converters=converters)
-        self.__lookup = lookup_table.set_index('id')
+        self.__lookup = lookup_table.set_index("id")
 
     @property
     def table(self):
@@ -105,8 +106,21 @@ class PdgRecords:
         """
         props = list(props)
         pdg_ids, pdg_inv_idxs = np.unique(pdgs, return_inverse=True)
+        contains_pythia = np.any(self.__lookup.loc[pdg_ids]["pythia"])
+        valid_pythia = {"name", "charge", "mass", "width"}
+        if contains_pythia and (not valid_pythia.issuperset(props)):
+            warnings.warn(
+                    "Some PDG codes in the query are missing from the records "
+                    "compiled by Scikit-HEP's Particle library. This is "
+                    "usually because the particles are so unstable that they "
+                    "are unobserved or unobservable. mcpid has filled in the "
+                    "gaps using Pythia's records, but only name, charge, "
+                    "mass, and width data are available. "
+                    "Please ensure, if you wish to access other properties, "
+                    "that you explicitly handle missing data."
+                    )
         uniq_data = self.__lookup.loc[pdg_ids][props]
         uniq_data = uniq_data.to_records()
-        uniq_data = rfn.drop_fields(uniq_data, 'id')
+        uniq_data = rfn.drop_fields(uniq_data, "id")
         data = uniq_data[pdg_inv_idxs]
         return data
